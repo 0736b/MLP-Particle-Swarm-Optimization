@@ -1,5 +1,6 @@
 import numpy as np
 from mlp.neuron import Neuron
+from utils.datareader import denormalize
 
 class MLP:
     """Multilayer Perceptron
@@ -13,6 +14,7 @@ class MLP:
         self.layers = {}
         self.layers_and_nodes = layers_and_nodes
         self.sse = []
+        self.linear_weights = []
         for i in range(len(layers_and_nodes)):
             t_layers = []
             for j in range(layers_and_nodes[i]):
@@ -81,7 +83,7 @@ class MLP:
         mae = se / len(dataset)
         return mae
     
-    def run_show(self, dataset):
+    def run_show(self, dataset, min_o, max_o):
         """forward pass and calculate error with show result as confusion matrix
 
         Args:
@@ -95,6 +97,12 @@ class MLP:
             self.forward_pass(train_data['INPUT'])
             error,desired_output = self.calc_error(train_data['OUTPUT'])
             se =+ error
+            predicted = self.layers['OUTPUT_LAYER'][0].get_output()
+            desired = desired_output[0]
+            # denorm
+            # predicted = denormalize(predicted, min_o, max_o)
+            # desired = denormalize(desired, min_o, max_o)
+            print('Predicted:', predicted, 'Desired:', desired)
         mae = se / len(dataset)
         return mae
     
@@ -113,6 +121,7 @@ class MLP:
         for c_node in weights:
             for c in c_node:
                 linear_weights.append(c)
+        self.linear_weights = linear_weights
         return linear_weights
     
     def set_new_weights(self, weights: list):
@@ -129,3 +138,4 @@ class MLP:
                     for l in range(neuron.prev_layer_neurons):
                         new_weights.append(linear_weights.pop(0))
                     neuron.set_weights(np.array(new_weights))
+        self.linear_weights = weights

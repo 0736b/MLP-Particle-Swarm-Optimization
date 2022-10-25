@@ -25,7 +25,7 @@ class Neuron:
         self.output = 0.0
         self.prev_layer_neurons = prev_layer_neurons
         if prev_layer_neurons != 0:
-            self.weights = np.array(np.random.uniform(-1.0,1.0,size=prev_layer_neurons)).reshape((prev_layer_neurons, 1))
+            self.weights = np.array(np.random.uniform(-2.0,2.0,size=prev_layer_neurons)).reshape((prev_layer_neurons, 1))
         else:
             self.weights = []
         self.bias = 0.0
