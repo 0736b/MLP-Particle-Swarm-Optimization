@@ -61,7 +61,7 @@ class MLP:
         """
         error = 0
         for i in range(len(self.layers['OUTPUT_LAYER'])):
-            error += np.power((self.layers['OUTPUT_LAYER'][i].get_output() - desired_output[i]),2)
+            error += np.abs((self.layers['OUTPUT_LAYER'][i].get_output() - desired_output[i]))
         return error, desired_output
     
     def run(self, dataset):
@@ -71,67 +71,61 @@ class MLP:
             dataset (list): dataset
 
         Returns:
-            float: mean square error after feed dataset of this model
+            float: mean absolute error after feed dataset of this model
         """
-        sse = 0.0
+        se = 0.0
         for train_data in dataset:
             self.forward_pass(train_data['INPUT'])
             error, desired_output = self.calc_error(train_data['OUTPUT'])
-            sse += error
-        mse = sse / len(dataset)
-        return mse
+            se += error
+        mae = se / len(dataset)
+        return mae
     
-    def run_show(self, dataset, cfm):
+    def run_show(self, dataset):
         """forward pass and calculate error with show result as confusion matrix
 
         Args:
             dataset (list): dataset
-            cfm (ConfusionMatrix): confusion matrix class
 
         Returns:
-            float: mean square error and accuracy after feed dataset of this model
+            float: mean absolute error after feed dataset of this model
         """
-        sse = 0.0
-        acc = 0.0
+        se = 0.0
         for train_data in dataset:
             self.forward_pass(train_data['INPUT'])
             error,desired_output = self.calc_error(train_data['OUTPUT'])
-            sse = sse + error
-            cfm.add_data(desired_output[0], self.layers['OUTPUT_LAYER'][0].get_output())
-            if self.layers['OUTPUT_LAYER'][0].get_output() == desired_output[0]:
-                acc += 1
-        mse = sse / len(dataset)
-        acc = (acc / len(dataset)) * 100
-        return mse,acc
+            se =+ error
+        mae = se / len(dataset)
+        return mae
     
-    def get_chromosome(self):
-        """return weights of all neurons (chromosome)
+    def get_weights(self):
+        """return weights of all neurons
 
         Returns:
-            list: weights of all neurons (chromosome)
+            list: weights of all neurons
         """
-        chromosome = []
+        weights = []
         for layer, neurons in self.layers.items():
             if 'HIDDEN_LAYER' in layer or 'OUTPUT_LAYER' in layer:
                 for neuron in neurons:
-                    chromosome.append(neuron.get_weights())
-        linear_chromosome = []
-        for c_node in chromosome:
+                    weights.append(neuron.get_weights())
+        linear_weights = []
+        for c_node in weights:
             for c in c_node:
-                linear_chromosome.append(c)
-        return linear_chromosome
+                linear_weights.append(c)
+        return linear_weights
     
-    def set_new_weights(self, chromosome: list):
-        """set new weights of all neurons (set new chromosome)
+    def set_new_weights(self, weights: list):
+        """set new weights of all neurons
 
         Args:
-            chromosome (list): new chromosome
+            weights (list): 
         """
-        linear_chromosome = chromosome
+        linear_weights = weights
         for layer, neurons in self.layers.items():
             if 'HIDDEN_LAYER' in layer or 'OUTPUT_LAYER' in layer:
                 for neuron in neurons:
                     new_weights = []
                     for l in range(neuron.prev_layer_neurons):
-                        new_weights.append(linear_chromosome.pop(0))
+                        new_weights.append(linear_weights.pop(0))
                     neuron.set_weights(np.array(new_weights))

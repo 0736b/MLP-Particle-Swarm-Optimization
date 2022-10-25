@@ -1,15 +1,15 @@
 import numpy as np
 
-def step(x):
-    """unit step function activation function for mlp
+def sigmoid(x):
+    """sigmoid function activation function for mlp
 
     Args:
         x (list): input values
 
     Returns:
-        list: output if x > 0 is 1 else 0
+        list: 1/(1+e^-x)
     """
-    return np.where(x>0, 1,0)
+    return 1/(1 + np.exp(-x))
 
 class Neuron:
     """Neuron
@@ -52,7 +52,7 @@ class Neuron:
         else:
             self.output = np.array(prev_layer_output)
             self.output = np.dot(self.output, self.weights)
-            self.output = step(self.output + self.bias)[0]
+            self.output = sigmoid(self.output + self.bias)[0]
         return self.output
     
     def get_output(self):
