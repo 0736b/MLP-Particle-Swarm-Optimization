@@ -117,3 +117,14 @@ def normalize(data):
 def denormalize(output, min_o, max_o):
     # Y_denorm = Y_norm * (max_Y - min_Y) + min_Y
     return (output * (max_o - min_o) + min_o)
+
+def vectorize(dataset):
+    all_input = []
+    all_output = []
+    for d in dataset:
+        all_input.append(d['INPUT'])
+        all_output.append(d['OUTPUT'])
+    all_input = np.array(all_input)
+    all_output = np.array(all_output)
+    com_dataset = [all_input, all_output]
+    return com_dataset
