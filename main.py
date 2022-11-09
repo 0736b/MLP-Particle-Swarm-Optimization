@@ -2,11 +2,15 @@ from utils.datareader import get_dataset, cross_valid, vectorize
 from pso.pso import PSO
 from vec_mlp.vec_mlp import VEC_MLP
 import pickle
-import time
 import numpy as np
 
 def main(predictDays: int):
-    # np.random.seed(seed=int(time.time()))
+    """running pso
+
+    Args:
+        predictDays (int): day to predict
+    """
+    np.random.seed(736)
     p5_paths = ['dataset/saved/p5/train_folds_p5.data','dataset/saved/p5/valid_folds_p5.data', 'dataset/saved/p5/min_o_p5.data', 'dataset/saved/p5/max_o_p5.data']
     p10_paths = ['dataset/saved/p10/train_folds_p10.data', 'dataset/saved/p10/valid_folds_p10.data', 'dataset/saved/p10/min_o_p10.data', 'dataset/saved/p10/max_o_p10.data']
     use_path = None
@@ -24,9 +28,9 @@ def main(predictDays: int):
     f_valid.close()
     folds = 10
     max_t = 100
-    particle_size = 20
-    path_model_train = 'saved/result_train/8-4-1/'
-    path_model_valid = 'saved/result_valid/8-4-1/'
+    particle_size = 30
+    path_model_train = 'saved/result_train/' + str(predictDays) + 'p/8-4-4-1/'
+    path_model_valid = 'saved/result_valid/' + str(predictDays) + 'p/8-4-4-1/'
     # crossvalidation
     valid_maes = []
     for i in range(folds):
@@ -35,25 +39,25 @@ def main(predictDays: int):
         valid_datas = valid_folds[i]
         train = vectorize(train_datas)
         valid = vectorize(valid_datas)
-        pso = PSO(particle_size, max_t, [8,4,1], train)
+        pso = PSO(particle_size, max_t, [8,4,4,1], train)
         best_particle, lowest_train_mae, log_result_gbest, log_result_pbest_avg = pso.run()
-        # print('log_result_gbest', log_result_gbest)
-        # print('log_result_pbest_avg', log_result_pbest_avg)
         with open(path_model_train + 'log_gbest' + str(i+1) + '.data', 'wb') as log_gbest:
             pickle.dump(log_result_gbest, log_gbest)
         with open(path_model_train + 'log_avg_best' + str(i+1) + '.data', 'wb') as log_avg_best:
             pickle.dump(log_result_pbest_avg, log_avg_best)
-        mlp = VEC_MLP([8,4,1])
+        mlp = VEC_MLP([8,4,4,1])
         mlp.set_weights(best_particle)
         print(on_fold, 'Best Particle MAE on Training set:', lowest_train_mae)
         print(on_fold, 'Validation...')
         mae = mlp.run(valid[0], valid[1])
         valid_maes.append(mae)
         print(on_fold, 'Best Particle MAE on Validation set:', mae)
-        with open(path_model_valid + 'best_mae' + str(i+1) + '.data', 'wb') as valid_mae:
-            pickle.dump(valid_maes, valid_mae)      
+    with open(path_model_valid + 'best_mae' + '10' + '.data', 'wb') as valid_mae:
+        pickle.dump(valid_maes, valid_mae)
     
 def save_dataset():
+    """pre processing dataset and save for fast load
+    """
     dataset_p5, min_o5, max_o5 = get_dataset('dataset/AirQualityUCI.xlsx', 5)
     dataset_p10, min_o10, max_o10 = get_dataset('dataset/AirQualityUCI.xlsx', 10)
     train_folds_p5, test_folds_p5 = cross_valid(dataset_p5)

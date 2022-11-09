@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
 import random
-from datetime import datetime
-from itertools import islice
 
 def get_dataset(path: str, predictDays: int):
     """read data from dataset file
@@ -115,10 +113,28 @@ def normalize(data):
     return norm
 
 def denormalize(output, min_o, max_o):
+    """de-normalization
+
+    Args:
+        output (float): output value
+        min_o (float): min output from dataset
+        max_o (float): max output from dataset
+
+    Returns:
+        de-norm output: de-norm output
+    """
     # Y_denorm = Y_norm * (max_Y - min_Y) + min_Y
     return (output * (max_o - min_o) + min_o)
 
 def vectorize(dataset):
+    """make input output vectorized for mlp
+
+    Args:
+        dataset (list): dataset
+
+    Returns:
+        dataset_vectorized: dataset_vectorized
+    """
     all_input = []
     all_output = []
     for d in dataset:
